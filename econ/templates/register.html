@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="mx-auto col-6">
+            <h1 class="mb-5">Register</h1>
+            {% if error == "username" %}
+            <div class="mb-3" style="color: #ff4545;">Username already taken</div>
+            {% elif error == "boxes" %}
+            <div class="mb-3" style="color: #ff4545;">You must fill out all input fields</div>
+            {% elif error == "control" %}
+            <div class="mb-3" style="color: #ff4545;">Passwords do not match up, try again &lpar;it's job is to protect you from accidently creating the wrong password, locking yourself out of your account.&rpar;</div>
+            {% endif %}
+            <form action="/register" method="post">
+                <!-- Username -->
+                <div class="mb-3 mx-auto text-start">
+                    <label for="username" class="form-label ">Username</label>
+                    <input class="form-control" name="username" autocomplete="off" autofocus id="username" placeholder="Enter username" type="text">
+                </div>
+                <!-- Password -->
+                <div class="mb-3 mx-auto text-start">
+                    <label for="password" class="form-label">Password</label>
+                    <input class="form-control" name="password" autocomplete="off" id="password" placeholder="Enter password" type="password">
+                </div>
+                <!-- Confirm password -->
+                <div class="mb-3 mx-auto text-start">
+                    <label for="control-password" class="form-label">Confirm password</label>
+                    <input class="form-control" name="control-password" autocomplete="off" id="control-password" placeholder="Re-enter password" type="password">
+                </div>
+                <!-- Submit -->
+                <div class="mb-3 mx-auto text-start">
+                    <button class="btn btn-primary" type="submit">Sign up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

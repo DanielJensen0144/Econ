@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    portfolio
+{% endblock %}
+
+{% block body %}
+
+    <div class="row">
+        <div class="mx-auto col-6">
+            <h1 class="mb-5">Log in</h1>
+            {% if error == "grrr" %}
+            <div class="mb-3" style="color: #ff4545">You must fill out all input fields</div>
+            {% elif error == "sus" %}
+            <div class="mb-3" style="color: #ff4545">Username or password incorrect, try again</div>
+            {% endif %}
+            
+            <form action="/login" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" autofocus autocomplete="off" class="mx-start form-control" id="username" name="username" placeholder="Enter username">
+                </div>
+                <div class="mb-3">
+                    <label for="password">Password</label>
+                    <input type="password" autocomplete="off" class="mx-start form-control" id="password" name="password" placeholder="Enter secret password">
+                    <div class="form-text">Your password is encrypted, I cannot see it</div>
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary" type="submit">Log in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

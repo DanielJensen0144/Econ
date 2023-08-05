@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="hidden mx-auto" style="margin-bottom: 200px">
+        <h1>Buy stocks</h1>
+        <form action="/confirm-b" method="post" id="buy-form">
+            <div class="mb-3 text-start gx-3 row">
+                <div class="col-lg-4">
+                    <label for="symbol" class="form-label">Enter stock symbol/ticker</label>
+                    <input type="text" class="form-control" name="symbol" autocomplete="off" autofocus placeholder="nflx" id="symbol" required>
+                </div>
+                <div class="col-lg-4">
+                    <label for="shares" class="form-label">Enter shares</label>
+                    <input type="number" class="form-control" name="shares" autocomplete="off" placeholder="1" id="shares" required>
+                </div>
+            </div>
+            <div class="mb-3 text-start">
+                <button type="submit" class="btn btn-primary" id="buy-form-btn">Proceed</button>
+            </div>
+        </form>
+    </div>
+    <div class="hidden nth2 row" id="buy-tips">
+        <h2 class="col-12 display-4 mb-5">Useful advice when buying</h2>
+
+        <div class="col-lg-10 mb-3">
+            <h3>Diversification</h3>
+            <p>When investing in the stock market, it's essential to diversify your portfolio. Diversification means spreading your investments across different sectors and asset classes. By not putting all your eggs in one basket, you can reduce the impact of a single stock's performance on your overall portfolio. Consider investing in various industries and company sizes to balance risk and potentially enhance long-term returns.</p>
+        </div>
+        <div class="col-lg-10 mb-3">
+            <h3>Long-Term Perspective</h3>
+            <p>Investing in stocks requires a long-term perspective. The stock market can be volatile in the short term, but historically, it has shown an upward trend over extended periods. Rather than reacting to short-term market fluctuations, focus on your long-term financial goals. Stay patient and committed to your investment strategy, and remember that successful investing is a marathon, not a sprint.</p>
+        </div>
+        <div class="col-lg-10 mb-3">
+            <h3>Doing Your Research</h3>
+            <p>Before making any investment decision, take the time to research and understand the companies you're interested in. Start googling. You should analyze their financial health, growth potential, competitive advantages, and industry trends.</p>
+            <p>Though well-informed decisions generally lead to better decisions, make sure that you do not get caught in over-analyzing or self-fulfilling behavior. Be objective and critical when researching stocks, but make sure that you're actually buying stocks and not just researching endlessly.</p>
+            <p>If you just want to look at the growth-trend of a single stock, you can go to use the research function <a href="/research" style="text-decoration: none;">here</a>.</p>
+        </div>
+        <div class="col-lg-10 mb-3">
+            <h3>Avoiding Emotional Trading</h3>
+            <p>Emotional trading can lead to impulsive decisions and negatively impact your investment returns. You shouldn't make decisions based on fear or greed, as emotions can cloud your judgment. Stick to your investment plan and avoid frequent buying and selling based on short-term market movements. You should stay focused on your long-term goals and avoid making rash decisions in response to market fluctuations.</p>
+        </div>
+        <div class="col-lg-10 mb-3">
+            <h3>Assessing Your Risk Tolerance</h3>
+            <p>Every investor has a different level of risk tolerance. It's crucial to assess your own comfort level with risk before investing. You should consider your financial situation, investment goals, and your margin of time. If you have a higher risk tolerance, you may be more willing to purchase higher-risk, higher-reward assets or day-trade. Conversely, if you have a lower risk tolerance, you may prefer more conservative investments. Align your investments with your risk tolerance to build a portfolio that suits your individual needs and goals.</p>
+        </div>
+    </div>
+    <footer>
+        <div class="text-center m-1" style="font-size: 80%; opacity: .8">
+            Econ vs. BM &copy; 2023 All rights reserved
+        </div>
+    </footer>
+{% endblock %}
+{% block js %}
+
+    <script>
+        const buyForm = document.getElementById("buy-form");
+        const submitButton = document.getElementById("buy-form-btn");
+
+        // disable submit button
+        buyForm.addEventListener('submit', (event) => {
+            submitButton.disabled = true;
+            event.preventDefault();
+            // confirm before purchase
+            if (confirm("Are you sure you want to make this purchase?")) {
+                buyForm.submit();
+            } else {
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+
+{% endblock %}

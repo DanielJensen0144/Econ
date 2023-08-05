@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+{% block script %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
+
+{% block body %}
+
+    <div class="hidden" style="margin-bottom: 100px;">
+        <h1>Research</h1>
+        <form action="/research" method="post">
+            <div class="mb-3 text-start gx-3 row">
+                <div class="col-lg-3 col-sm-6">
+                    <label class="form-label" for="symbol">Enter stock symbol/ticker</label>
+                    <input class="form-control" name="symbol" type="text" autocomplete="off" autofocus placeholder="nflx" id="symbol">
+                </div>
+                <div class="col-12 mb-3"></div>
+                <div class="col-lg-4 col-md-6">
+                    <input type="radio" class="btn-check" name="days" id="days" autocomplete="off" value="7">
+                    <label class="btn btn-outline-primary me-1" for="days">1 week</label>
+                    <input type="radio" class="btn-check" name="days" id="days-1" autocomplete="off" checked value="31">
+                    <label class="btn btn-outline-primary me-1" for="days-1">1 month</label>
+                    <input type="radio" class="btn-check" name="days" id="days-2" autocomplete="off" value="92">
+                    <label class="btn btn-outline-primary me-1" for="days-2">3 months</label>
+                    <input type="radio" class="btn-check" name="days" id="days-3" autocomplete="off" value="365">
+                    <label class="btn btn-outline-primary me-1" for="days-3">1 year</label>
+                </div>
+            </div>
+            <div class="mb-3 text-start w-50">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+    <div class="row table-responsive-sm">
+        {% if request.method == "GET" %}
+        <div class="hidden nth2">
+            <h1 class="mb-3 col-lg-12">Daniel Jensen Inc.</h1>
+            <table class="table shadow-sm col-12 text-center">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Symbol</th>
+                        <th>High</th>
+                        <th>Low</th>
+                        <th>Adj Close</th>
+                        <th>Volume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <td>2006-06-10</td>
+                    <td>JNSN</td>
+                    <td>$1,000,000.01</td>
+                    <td>$999,999.99</td>
+                    <td>$1,000,000.00</td>
+                    <td>100,000</td>
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if er != True and request.method == "POST" %}
+        <div class="hidden nth2">
+            <h1 class="mb-3 col-lg-6 hidden">{{ name }}</h1>
+            <table class="table shadow-sm col-12 text-center hidden nth2" style="table-layout: fixed">
+                <caption class="darkTxt" style="font-size: .9rem; margin-left: 4px">Symbol = {{ symbol }}, Days = {{ days }} | For additional metrics, visit <a href="https://finance.yahoo.com/chart/{{ symbol }}" target="_blank">Yahoo Finance &dash; {{ symbol }}</a></caption>
+                <thead>
+                    <tr>
+                        <th style="width: 16.66%">Date</th>
+                        <th style="width: 16.66%">Stock</th>
+                        <th style="width: 16.66%">High</th>
+                        <th style="width: 16.66%">Low</th>
+                        <th style="width: 16.66%">Adj Close</th>
+                        <th style="width: 16.66%">Volume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(len) %}
+                    <tr>
+                        <td class="dataDate">{{ q_d[i] }}</td>
+                        <td class="symbol">{{ symbol }}</td>
+                        <td class="dataHigh">{{ usd(q_h[i]) }}</td>
+                        <td class="dataLow">{{ usd(q_l[i]) }}</td>
+                        <td class="dataAdjustedCloseUSD">{{ usd(q_p[i]) }}</td>
+                        <td class="dataAdjustedClose" style="display: none;">{{ q_p[i] }}</td>
+                        <td class="dataVolume">{{ q_v[i] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-center hidden">
+            <h2 class="col-12">Metrics</h2>
+            <div class="col-12 h5" style="font-weight: 300">GROWTH:
+                {% if growth < 0 %}
+                <span style="color: #ff5656"><span class="op125">-</span>${{ growth * -1 }}</span>
+                {% elif growth == 0 %}
+                <span>None</span>
+                {% else %}
+                <span style="color: #23ff23"><span class="op125">+</span>${{ growth }}</span>
+                {% endif %}
+            </div>
+            <div class="col-12 h5" style="font-weight: 300">GROWTH PERCENTAGE:
+                {% if growth < 0 %}
+                <span style="color: #ff5656"><span class="op125">-</span>{{ growth_p * -1 }}&percnt;</span>
+                {% elif growth == 0 %}
+                <span>None</span>
+                {% else %}
+                <span style="color: #23ff23"><span class="op125">+</span>{{ growth_p2 }}&percnt;</span>
+                {% endif %}
+            </div>
+            <!-- if viewport > md -->
+            <div class="col-12">
+                <canvas id="myChart"></canvas>
+            </div>
+            <!-- JS variables -->
+            <div style="display: none">
+                <div id="documentName">research</div>
+                <div id="dayCount">{{ days }}</div>
+                <div id="lineColor">#0d6efd</div>
+                <div id="nodeColor">#fff</div>
+                <div id="scalesColor">#212529</div>
+            </div>
+        </div>
+        {% endif %}
+        {% if error == "graph" %}
+        <div style="color: #ff4545">Couldn't gather historical data</div>
+        {% elif error == "quote" %}
+        <div style="color: #ff4545">Invalid symbol or other input failure</div>
+        {% elif error == "days" %}
+        <div class="mt-3" style="color: #ff4545">Nice hacking, now you can grab any integer of days as long as it's between 7 and 365 days.</div>
+        <div class="mt-3 mb-5">Also quick note: If you want to help me, you're welcome to go searching for hacks that I haven't protected from yet. If you find 3 hacks that I haven't protected from, email me at <a href="mailto:jensendaniel0144@gmail.com">jensendaniel0144@gmail.com</a>, explain the hacks to me and include a pizzaplace nearby so we can find a safe and private way for me to send you a pizza.</div>
+        {% elif error == "float" %}
+        <div class="mt-3" style="color: #ff4545">Nice hacking, you can only do this as long as you set days to an integer between 7 and 365. Happy hacking.</div>
+        <div class="mt-3 mb-5">Also quick note: If you want to help me, you're welcome to go searching for hacks that I haven't protected from yet. If you find 3 hacks that I haven't protected from, email me at <a href="mailto:jensendaniel0144@gmail.com">jensendaniel0144@gmail.com</a>, explain the hacks to me and include a pizzaplace nearby so we can find a safe and private way for me to send you a pizza.</div>
+        {% endif %}
+    </div>
+    {% if er != True %}
+    <footer>
+        <div class="text-center m-1" style="font-size: 80%; opacity: .8">
+            Econ vs. BM &copy; 2023 All rights reserved
+        </div>
+    </footer>
+    {% endif %}
+{% endblock %}

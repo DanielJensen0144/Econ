@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <h1 class="text-center mb-3">History</h1>
+    {% if len > 0 %}
+        <table class="table text-center mb-5" style="table-layout: fixed">
+            <thead>
+                <tr>
+                    <th style="width: 20%">Action</th>
+                    <th style="width: 20%">Symbol</th>
+                    <th style="width: 20%">Shares</th>
+                    <th style="width: 20%">Price</th>
+                    <th style="width: 20%">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(len) %}
+                <tr>
+                    <td>{{ history[len - (i + 1)]["type"] }}</td>
+                    <td>{{ history[len - (i + 1)]["name"] }}</td>
+                    <td>{{ history[len - (i + 1)]["shares"] }}</td>
+                    <td>{{ history[len - (i + 1)]["price"] }}</td>
+                    <td>{{ history[len - (i + 1)]["time"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <footer>
+            <div class="text-center m-1" style="font-size: 80%; opacity: .8">
+                Econ vs. BM &copy; 2023 All rights reserved
+            </div>
+        </footer>
+    {% elif len == 0 %}
+    <div class="lead text-center">
+        <p>You currently have no user history. To add history, you have to buy and sell stocks.</p>
+        <a href="/research">Go to Research</a>
+    </div>
+    {% endif %}
+
+{% endblock %}

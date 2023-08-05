@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <h1 class="hidden">Sell stocks</h1>
+    <form class="hidden" action="/confirm-s" method="post" style="transition-delay: .1s;" id="sell-form">
+        <div class="mb-3 text-start gx-3 row">
+            <div class="col-lg-4">
+                <label for="symbol" class="form-label">Enter stock symbol/ticker</label>
+                <input type="text" class="form-control" name="symbol" autocomplete="off" autofocus placeholder="nflx" id="symbol">
+            </div>
+            <div class="col-lg-4">
+                <label for="shares" class="form-label">Enter shares</label>
+                <input type="number" class="form-control" name="shares" autocomplete="off" placeholder="1" id="shares">
+            </div>
+            <div class="col-12 mt-2">Don't even think of selling more than you own >:&lpar;</div>
+        </div>
+        <div class="mb-3 text-start w-50">
+            <button type="submit" class="btn btn-primary" id="sell-form-btn">Proceed</button>
+        </div>
+    </form>
+
+{% endblock %}
+{% block js %}
+
+    <script>
+        const sellForm = document.getElementById("sell-form");
+        const submitButton = document.getElementById("sell-form-btn");
+
+        // disable submit button
+        sellForm.addEventListener('submit', (event) => {
+            submitButton.disabled = true;
+            event.preventDefault();
+            // confirm before purchase
+            if (confirm("Are you sure you want to make this purchase?")) {
+                sellForm.submit();
+            } else {
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,10 @@
+{% for i in range(len) %}
+<tr>
+    <td>{{ q_d[i] }}</td>
+    <td>{{ symbol }}</td>
+    <td>{{ q_h[i] }}</td>
+    <td>{{ q_l[i] }}</td>
+    <td>{{ q_p[i] }}</td>
+    <td>{{ q_v[i] }}</td>
+</tr>
+{% endfor %}

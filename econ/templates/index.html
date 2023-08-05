@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <h1>Portfolio</h1>
+    {% if length > 0 %}
+        <div class="row">
+            <div class="col-12">
+                <table class="table text-center" style="table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Stock</th>
+                            <th style="width: 25%">Price</th>
+                            <th style="width: 25%">Shares</th>
+                            <th style="width: 25%">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in range(length) %}
+                        <tr>
+                            {% if len(portfolio[i]["name"]) < 33 %}
+                            <td>{{ portfolio[i]["name"] }}</td>
+                            {% else %}
+                            <td>{{ portfolio[i]["symbol"] }}</td>
+                            {% endif %}
+                            <td>{{ portfolio[i]["price"] }}</td>
+                            <td>{{ portfolio[i]["shares"] }}</td>
+                            <td>{{ portfolio[i]["total"] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-end">
+                    <div class="h5">Cash: {{ cash }}</div>
+                    <div class="h5">Total Account Value: {{ cash_total }}</div>
+                </div>
+            </div>
+        </div>
+    {% elif length < 1 %}
+    <div class="lead">Your porfolio is currently empty, you have {{ cash }} in your account.</div>
+    {% endif %}
+
+{% endblock %}
