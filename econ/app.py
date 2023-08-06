@@ -214,52 +214,54 @@ def confirm_b():
     # add stock and subtract price from user's cash
     if cash < total:
         return render_template("buy.html", error="broke", er=True)
-    elif total < 1:
+    elif shares < 0:
         return render_template("buy.html", error="hackerman", er=True)
+    elif shares == 0:
+        return render_template("buy.html", error="no_shares", er=True)
     else:
         db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", total, id)
         db.execute("INSERT INTO stocks (name, share_count, price, owner_id) VALUES (?,?,?,?)", symbol, shares, price, id)
         db.execute("DELETE FROM stocks WHERE share_count = 0 AND owner_id = ?", id)
         db.execute("INSERT INTO history (type, name, shares, price, id, time) VALUES (?,?,?,?,?,?)", "Bought", name, shares, price, id, datetime.now())
         return redirect("/")
-        # return render_template("confirm_buy.html", symbol=symbol, shares=shares, price=price, total=total, cash=cash)
+        # return render_template("buy.html", symbol=symbol, shares=shares, price=price, total=total, cash=cash)
         
-@app.route("/sell")
+@app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
-    return render_template("sell.html");
-
-@app.route("/confirm-s", methods=["POST"])
-@login_required
-def confirm_s():
-    # get form data
-    symbol = request.form.get("symbol").upper()
-    shares = int(request.form.get("shares"))
-    stock = lookup(symbol)
-    if lookup(symbol) == None:
-        return render_template("sell.html", error=symbol, er=True)
-    
-    price = stock["price"]
-    total = (price * shares)
-    id = session["user_id"]
-    share_total = db.execute("SELECT SUM(share_count) FROM stocks WHERE owner_id = ? AND name = ?", id, symbol)[0]["SUM(share_count)"]
-    cash = db.execute("SELECT cash FROM users WHERE id = ?", id)[0]["cash"]
-    name = get_name(symbol)
-    if len(name) > 32:
-        name = symbol
-
-    # sell stock
-    if not share_total or share_total < shares:
-        return render_template("sell.html", error="scammer", er=True)
-    elif shares < 0:
-        return render_template("sell.html", error="selfscammer_or_deficitbuyer", er=True)
+    if request.method == "GET":
+        return render_template("sell.html")
     else:
-        db.execute("UPDATE stocks SET share_count = share_count - ? WHERE owner_id = ? AND name = ?", shares, id, symbol)
-        db.execute("DELETE FROM stocks WHERE share_count = 0 AND owner_id = ?", id)
-        db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", total, id)
-        db.execute("INSERT INTO history (type, name, shares, price, id, time) VALUES (?,?,?,?,?,?)", "Sold", name, shares, price, id, datetime.now())
-        # return render_template("confirm_sell.html", symbol=symbol, shares=shares, price=price, total=total, cash=cash)
-        return redirect("/")
+        # get form data
+        symbol = request.form.get("symbol").upper()
+        shares = int(request.form.get("shares"))
+        stock = lookup(symbol)
+        if lookup(symbol) == None:
+            return render_template("sell.html", error=symbol, er=True)
+        
+        price = stock["price"]
+        total = (price * shares)
+        id = session["user_id"]
+        share_total = db.execute("SELECT SUM(share_count) FROM stocks WHERE owner_id = ? AND name = ?", id, symbol)[0]["SUM(share_count)"]
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", id)[0]["cash"]
+        name = get_name(symbol)
+        if len(name) > 32:
+            name = symbol
+
+        # sell stock
+        if not share_total or share_total < shares:
+            return render_template("sell.html", error="scammer", er=True)
+        elif shares < 0:
+            return render_template("sell.html", error="selfscammer_or_deficitbuyer", er=True)
+        elif shares == 0:
+            return render_template("sell.html", error="no_shares", er=True)
+        else:
+            db.execute("UPDATE stocks SET share_count = share_count - ? WHERE owner_id = ? AND name = ?", shares, id, symbol)
+            db.execute("DELETE FROM stocks WHERE share_count = 0 AND owner_id = ?", id)
+            db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", total, id)
+            db.execute("INSERT INTO history (type, name, shares, price, id, time) VALUES (?,?,?,?,?,?)", "Sold", name, shares, price, id, datetime.now())
+            # return render_template("sell.html", symbol=symbol, shares=shares, price=price, total=total, cash=cash)
+            return redirect("/")
 
 
 @app.route("/history")
@@ -284,6 +286,8 @@ def history():
 
     # render history
     return render_template("history.html", history=history, len=n);
+
+@app.route("/leaderboards")
 
     
 @app.route("/logout")

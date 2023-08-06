@@ -20,6 +20,20 @@
             </div>
         </form>
     </div>
+    {% if er == True %}
+    <div class="mb-3">
+        {% if error == 'symbol' %}
+        <div style="color: #ff4545">Couldn't find symbol.</div>
+        {% elif error == 'broke' %}
+        <div style="color: #ff4545">Your account balance is too low.</div>
+        {% elif error == 'hackerman' %}
+        <div class="mb-3" style="color: #ff4545">You can't do that here.</div>
+        <div w-75">Note for all hackers: If you want to help me, you're welcome to go searching for hacks that I haven't protected from yet. If you find 3 hacks that I haven't protected from, email me at <a href="mailto:jensendaniel0144@gmail.com">jensendaniel0144@gmail.com</a>, explain the hacks to me and include a pizzaplace nearby so we can find a safe and private way for me to send you a pizza.</div>
+        {% elif error == 'no_shares' %}
+        <div style="color: #ff4545">Surely you can afford more than 0 shares.</div>
+        {% endif %}
+    </div>
+    {% endif %}
     <div class="hidden nth2 row" id="buy-tips">
         <h2 class="col-12 display-4 mb-5">Useful advice when buying</h2>
 
