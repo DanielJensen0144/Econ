@@ -285,9 +285,31 @@ def history():
         n += 1
 
     # render history
-    return render_template("history.html", history=history, len=n);
+    return render_template("history.html", history=history, len=n)
 
-@app.route("/leaderboards")
+
+if db.execute("SELECT user_id FROM group_links WHERE user_id = ?", session["user_id"]):
+    @app.route("/groups")
+    @login_required
+    def groups():
+        group_id = db.execute("SELECT group_id FROM group_links WHERE user_id = ?", session["user_id"])[0]
+        group_user_ids = db.execute("SELECT user_id FROM group_links WHERE group_id = ?", group_id)
+        group_users = []
+        i = 0
+        for user_id in group_user_ids:
+            group_users[i] = {
+                'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0],
+                'cash': db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]
+            }
+            i += 1
+
+        return render_template("dashboard.html", group_id, group_users=group_users, len=i)
+else:
+    @app.route("/groups", methods=["GET", "POST"])
+    @login_required
+    def groups():
+        if request.method == "GET":
+            return render_template("join_groups.html")
 
     
 @app.route("/logout")
