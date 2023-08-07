@@ -153,9 +153,9 @@ def research():
             
         # collect multiple data points
         q = graph_lookup(symbol, days)
-        length = len(q["q_date"])
         if q == None:
             return render_template("research.html", error="graph", er=True)
+        length = len(q["q_date"])
         
         # get data lists
         q_d = []
@@ -189,42 +189,41 @@ def research():
         return render_template("research.html", name=name, symbol=symbol, len=length, q_d=q_d, q_h=q_h, q_l=q_l, q_p=q_p, q_v=q_v, days=days, growth=growth, growth_p=growth_percentage, growth_p2=growth_p2, error=error, usd=usd)
     
 
-@app.route("/buy")
+@app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
-    return render_template("buy.html")
-
-@app.route("/confirm-b", methods=["POST"])
-@login_required
-def confirm_b():
-    # collect data and store it semantically
-    symbol = request.form.get("symbol").upper()
-    if lookup(symbol) == None:
-        return render_template("buy.html", error="symbol", er=True)
-    shares = int(request.form.get("shares"))
-    stock = lookup(symbol)
-    price = stock["price"]
-    total = (price * shares)
-    id = session["user_id"]
-    cash = db.execute("SELECT cash FROM users WHERE id = ?", id)[0]["cash"]
-    name = get_name(symbol)
-    if len(name) > 32:
-        name = symbol
-
-    # add stock and subtract price from user's cash
-    if cash < total:
-        return render_template("buy.html", error="broke", er=True)
-    elif shares < 0:
-        return render_template("buy.html", error="hackerman", er=True)
-    elif shares == 0:
-        return render_template("buy.html", error="no_shares", er=True)
+    if request.method == "GET":
+        return render_template("buy.html")
     else:
-        db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", total, id)
-        db.execute("INSERT INTO stocks (name, share_count, price, owner_id) VALUES (?,?,?,?)", symbol, shares, price, id)
-        db.execute("DELETE FROM stocks WHERE share_count = 0 AND owner_id = ?", id)
-        db.execute("INSERT INTO history (type, name, shares, price, id, time) VALUES (?,?,?,?,?,?)", "Bought", name, shares, price, id, datetime.now())
-        return redirect("/")
-        # return render_template("buy.html", symbol=symbol, shares=shares, price=price, total=total, cash=cash)
+        # collect data and store it semantically
+        symbol = request.form.get("symbol").upper()
+        if lookup(symbol) == None:
+            return render_template("buy.html", error="symbol", er=True)
+        shares = int(request.form.get("shares"))
+        stock = lookup(symbol)
+        price = stock["price"]
+        total = (price * shares)
+        id = session["user_id"]
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", id)[0]["cash"]
+        name = get_name(symbol)
+        if len(name) > 32:
+            name = symbol
+
+        # add stock and subtract price from user's cash
+        if cash < total:
+            return render_template("buy.html", error="broke", er=True)
+        elif shares < 0:
+            return render_template("buy.html", error="hackerman", er=True)
+        elif shares == 0:
+            return render_template("buy.html", error="no_shares", er=True)
+        else:
+            db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", total, id)
+            db.execute("INSERT INTO stocks (name, share_count, price, owner_id) VALUES (?,?,?,?)", symbol, shares, price, id)
+            db.execute("DELETE FROM stocks WHERE share_count = 0 AND owner_id = ?", id)
+            db.execute("INSERT INTO history (type, name, shares, price, id, time) VALUES (?,?,?,?,?,?)", "Bought", name, shares, price, id, datetime.now())
+            return redirect("/")
+            # return render_template("buy.html", symbol=symbol, shares=shares, price=price, total=total, cash=cash)
+
         
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
@@ -288,28 +287,47 @@ def history():
     return render_template("history.html", history=history, len=n)
 
 
-if db.execute("SELECT user_id FROM group_links WHERE user_id = ?", session["user_id"]):
-    @app.route("/groups")
-    @login_required
-    def groups():
-        group_id = db.execute("SELECT group_id FROM group_links WHERE user_id = ?", session["user_id"])[0]
-        group_user_ids = db.execute("SELECT user_id FROM group_links WHERE group_id = ?", group_id)
-        group_users = []
-        i = 0
-        for user_id in group_user_ids:
-            group_users[i] = {
-                'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0],
-                'cash': db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]
-            }
-            i += 1
+@app.route("/groups", methods=["GET","POST"])
+@login_required
+def groups():
+    id = session["user_id"]
+    if db.execute("SELECT ext_user_id FROM group_links WHERE ext_user_id = ?", id):
+        if request.method == "GET":
+            group_id = db.execute("SELECT ext_group_id FROM group_links WHERE ext_user_id = ?", id)[0]
+            group_user_ids = db.execute("SELECT ext_user_id FROM group_links WHERE ext_group_id = ?", group_id)
+            group_users = []
+            i = 0
+            for user_id in group_user_ids:
+                group_users[i] = {
+                    'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0],
+                    'cash': db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]
+                }
+                i += 1
 
-        return render_template("dashboard.html", group_id, group_users=group_users, len=i)
-else:
-    @app.route("/groups", methods=["GET", "POST"])
-    @login_required
-    def groups():
+            return render_template("dashboard.html", group_id, group_name=group_name, group_users=group_users, len=i)
+    else:
         if request.method == "GET":
             return render_template("join_groups.html")
+        else:
+            group_name = request.form.get("group_name")
+            group_id = db.execute("SELECT group_id FROM groups WHERE group_name LIKE ?", group_name)[0]
+            group_key = request.form.get("group_key")
+
+            if pass_check(db.excecute("SELECT group_key FROM groups WHERE group_id = ?", group_id)[0], group_key):
+                if request.form.get("group_key"):
+                    teacher_key = request.form.get("group_key")
+                    if pass_check(db.execute("SELECT teacher_key FROM groups WHERE group_name LIKE ?", group_name)[0], teacher_key):
+                        db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, is_teacher) VALUES (?,?,?)", group_id, id, 1)
+                        return redirect("/groups")
+                    else:
+                        return render_template("join_groups.html", error="teacher_key", er=True)
+                else:
+                    db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, is_teacher) VALUES (?,?,?)", group_id, id, 0)
+                    return redirect("/groups")
+            else:
+                return render_template("join_groups.html", error="group_key", er=True)
+
+                    
 
     
 @app.route("/logout")
