@@ -31,7 +31,8 @@ let elements = {
   darkNav: document.querySelector("nav"),
   darkLine: document.getElementById("lineColor"),
   darkNode: document.getElementById("nodeColor"),
-  darkScales: document.getElementById("scalesColor")
+  darkScales: document.getElementById("scalesColor"),
+  darkCard: document.querySelectorAll(".card")
   };
 if (elements["darkSwitch"] == null) {
   elements["darkSwitch"] = document.getElementById("darkmodeBtn");
@@ -65,7 +66,7 @@ function getDarkModeFromCookie() {
 
 // Function to apply dark mode styles
 function applyDarkMode(isDarkMode) {
-  const { darkBody, darkTxt, darkTable, darkLogoLight, darkLogoDark, darkNav, darkLine, darkNode, darkScales } = elements;
+  const { darkBody, darkTxt, darkTable, darkLogoLight, darkLogoDark, darkNav, darkLine, darkNode, darkScales, darkCard } = elements;
   if (isDarkMode) {
     // dim everything down
     darkBody.classList.add('backgroundDark');
@@ -86,6 +87,14 @@ function applyDarkMode(isDarkMode) {
     darkLogoLight.style.opacity = 0;
     darkLogoDark.style.display = "block";
     darkLogoDark.style.opacity = 1;
+
+    if (darkCard) {
+      darkCard.forEach((el) => {
+        el.classList.add('text-bg-dark');
+        el.classList.remove('border-dark');
+        el.classList.add('border-light');
+      })
+    }
     
     // change the local storage and cookie status
     setDarkModeLocalStorage(isDarkMode);
@@ -105,6 +114,14 @@ function applyDarkMode(isDarkMode) {
       darkLogoDark.style.display = "none";
       darkLogoDark.style.opacity = 0;
       
+      if (darkCard) {
+        darkCard.forEach((el) => {
+          el.classList.remove('text-bg-dark');
+          el.classList.remove('border-light');
+          el.classList.add('border-dark');
+        })
+      }
+
       // change the local storage and cookie status
       setDarkModeLocalStorage(isDarkMode);
       setDarkModeCookie(isDarkMode);

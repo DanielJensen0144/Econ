@@ -153,6 +153,7 @@ def research():
             
         # collect multiple data points
         q = graph_lookup(symbol, days)
+        # the BTC-USD error is a yahoo thing, not a graph_lookup thing
         if q == None:
             return render_template("research.html", error="graph", er=True)
         length = len(q["q_date"])
@@ -331,7 +332,7 @@ def groups():
                 group_cash_sum += group_users[n]['portfolio_value']
             group_cash_average = round((group_cash_sum / i), 2)
 
-            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average)
+            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average, usd=usd)
     else:
         if request.method == "GET":
             return render_template("join_groups.html")
