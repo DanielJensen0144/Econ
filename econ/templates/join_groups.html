@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+    <h1 class="mb-3 text-center">Join Group</h1>
+    <form class="row g-1 justify-content-center" action="/groups" method="post">
+        <div class="col-lg-4">
+            <label for="group_name" class="form-label">Group Name</label>
+            <input type="text" class="form-control" id="group_name" autocomplete="off" name="group_name" placeholder="ElmoreHigh" autofocus>
+        </div>
+        <div class="col-12"></div>
+        <div class="col-lg-4">
+            <label for="group_key" class="form-label">Group Key</label>
+            <input type="text" class="form-control" id="group_key" autocomplete="off" name="group_key" placeholder="GMBL">
+        </div>
+        <div class="col-12"></div>
+        <div class="col-lg-4">
+            <label for="teacher_key" class="form-label">Teacher Key &lpar;Leave blank if not teacher&rpar;</label>
+            <input type="text" class="form-control" id="teacher_key" autocomplete="off" name="teacher_key" placeholder="PENNY">
+        </div>
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+    {% if error == "teacher_key" %}
+    <div class="text-center mt-3" style="color: #ff4545">Invalid Teacher Key</div>
+    {% endif %}
+
+{% endblock %}
