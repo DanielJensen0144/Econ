@@ -293,30 +293,37 @@ def groups():
     id = session["user_id"]
     if db.execute("SELECT ext_user_id FROM group_links WHERE ext_user_id = ?", id):
         if request.method == "GET":
-            group_id = db.execute("SELECT ext_group_id FROM group_links WHERE ext_user_id = ?", id)[0]
+            group_id = db.execute("SELECT ext_group_id FROM group_links WHERE ext_user_id = ?", id)[0]['ext_group_id']
+            group_name = db.execute("SELECT group_name FROM groups WHERE group_id = ?", group_id)[0]["group_name"]
             group_user_ids = db.execute("SELECT ext_user_id FROM group_links WHERE ext_group_id = ?", group_id)
+            user_len = len(group_user_ids)
+            for i in range(user_len):
+                group_user_ids[i] = group_user_ids[0]['ext_user_id']
+
             group_users = []
             i = 0
             for user_id in group_user_ids:
-                group_users[i] = {
-                    'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0],
-                    'cash': db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]
-                }
+                group_users.append({
+                    'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username'],
+                    'cash': db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]['cash']
+                })
                 i += 1
 
-            return render_template("dashboard.html", group_id, group_name=group_name, group_users=group_users, len=i)
+            return render_template("dashboard.html", group_id=group_id, group_name=group_name, group_users=group_users, len=i)
     else:
         if request.method == "GET":
             return render_template("join_groups.html")
         else:
             group_name = request.form.get("group_name")
-            group_id = db.execute("SELECT group_id FROM groups WHERE group_name LIKE ?", group_name)[0]
+            group_id = db.execute("SELECT group_id FROM groups WHERE group_name LIKE ?", group_name)[0]["group_id"]
             group_key = request.form.get("group_key")
 
-            if pass_check(db.excecute("SELECT group_key FROM groups WHERE group_id = ?", group_id)[0], group_key):
-                if request.form.get("group_key"):
-                    teacher_key = request.form.get("group_key")
-                    if pass_check(db.execute("SELECT teacher_key FROM groups WHERE group_name LIKE ?", group_name)[0], teacher_key):
+            arnold_key = db.execute("SELECT group_key FROM groups WHERE group_id = ?", group_id)[0]["group_key"]
+            if pass_check(arnold_key, group_key):
+                if request.form.get("teacher_key"):
+                    teacher_key = request.form.get("teacher_key")
+                    arnold_key_2 = db.execute("SELECT teacher_key FROM groups WHERE group_name LIKE ? LIMIT 1", group_name)[0]["teacher_key"]
+                    if pass_check(arnold_key_2, teacher_key):
                         db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, is_teacher) VALUES (?,?,?)", group_id, id, 1)
                         return redirect("/groups")
                     else:
