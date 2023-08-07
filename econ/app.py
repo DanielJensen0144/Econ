@@ -105,7 +105,7 @@ def index():
         price = stock["price"]
         shares = asset["SUM(share_count)"]
         total = shares * price
-        cash_total = cash_total + total
+        cash_total += total
 
         portfolio[n] = {"name": name, "price": usd(price), "shares": csn(shares), "total": usd(total), "symbol": symbol}
         n += 1
@@ -300,16 +300,38 @@ def groups():
             for i in range(user_len):
                 group_user_ids[i] = group_user_ids[0]['ext_user_id']
 
-            group_users = []
+            group_users = {}
             i = 0
             for user_id in group_user_ids:
-                group_users.append({
+                username = db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username']
+                cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]['cash']
+                portfolio_value = cash
+                for asset in db.execute("SELECT name, SUM(share_count) FROM stocks WHERE owner_id = ? GROUP BY name", user_id):
+                    stock = lookup(asset['name'])
+                    price = stock['price']
+                    shares = asset['SUM(share_count)']
+                    stock_total = price * shares
+                    portfolio_value += stock_total
+                print(portfolio_value)
+
+                group_users[i] = {
                     'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username'],
-                    'cash': db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]['cash']
-                })
+                    'portfolio_value': round(portfolio_value, 2)
+                }
                 i += 1
 
-            return render_template("dashboard.html", group_id=group_id, group_name=group_name, group_users=group_users, len=i)
+            teacher_status = db.execute('SELECT is_teacher FROM group_links WHERE ext_user_id = ?', id)[0]['is_teacher']
+            if teacher_status == 1:
+                is_teacher = True
+            else:
+                is_teacher = False
+
+            group_cash_sum = 0
+            for n in range(i):
+                group_cash_sum += group_users[n]['portfolio_value']
+            group_cash_average = round((group_cash_sum / i), 2)
+
+            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average)
     else:
         if request.method == "GET":
             return render_template("join_groups.html")
