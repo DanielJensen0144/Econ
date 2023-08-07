@@ -332,7 +332,9 @@ def groups():
                 group_cash_sum += group_users[n]['portfolio_value']
             group_cash_average = round((group_cash_sum / i), 2)
 
-            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average, usd=usd)
+            now = datetime.now().replace(microsecond=0)
+
+            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average, usd=usd, datetime=now)
     else:
         if request.method == "GET":
             return render_template("join_groups.html")

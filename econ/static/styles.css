@@ -52,3 +52,7 @@ table {
 #buy-tips p {
     font-size: 1.2rem;
 }
+
+.mono {
+    font-family: monospace;
+}

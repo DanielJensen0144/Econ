@@ -61,7 +61,7 @@
             <table class="table shadow-sm col-12 text-center hidden nth2" style="table-layout: fixed">
                 <caption class="darkTxt" style="font-size: .9rem; margin-left: 4px">Symbol = {{ symbol }}, Days = {{ days }} | For additional metrics, visit <a href="https://finance.yahoo.com/chart/{{ symbol }}" target="_blank">Yahoo Finance &dash; {{ symbol }}</a></caption>
                 <thead>
-                    <tr>
+                    <tr style="font-size: 1.05rem">
                         <th style="width: 16.66%">Date</th>
                         <th style="width: 16.66%">Stock</th>
                         <th style="width: 16.66%">High</th>
@@ -72,7 +72,7 @@
                 </thead>
                 <tbody>
                     {% for i in range(len) %}
-                    <tr>
+                    <tr class="mono" style="font-size: 1.05rem">
                         <td class="dataDate">{{ q_d[i] }}</td>
                         <td class="symbol">{{ symbol }}</td>
                         <td class="dataHigh">{{ usd(q_h[i]) }}</td>
