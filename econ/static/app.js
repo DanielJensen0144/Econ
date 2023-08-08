@@ -76,7 +76,8 @@ function applyDarkMode(isDarkMode) {
       darkTable.classList.add('table-dark');
     }
     if (darkLine && darkNode && darkScales) {
-      darkLine.innerHTML = '#fff';
+      const darkLineColor = document.getElementById('darkLineColor').innerHTML;
+      darkLine.innerHTML = darkLineColor;
       darkNode.innerHTML = '#212529';
       darkScales.innerHTML = '#fff';
       makeGraph();
@@ -287,9 +288,7 @@ function makeGraph() {
         {
             label: 'Portfolio Value',
             data: portfolioValueData,
-            borderColor: lineColor,
-            backgroundColor: nodeColor,
-            borderWidth: 3
+            backgroundColor: lineColor
           }
       ]
     };
