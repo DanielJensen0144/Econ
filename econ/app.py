@@ -327,6 +327,13 @@ def groups():
                 }
                 i += 1
 
+            sorted_group_users = []
+            for n in range(i):
+                sorted_group_users.append(group_users[n]['portfolio_value'])
+
+            print(sorted_group_users)
+            sorted_group_users.sort(reverse=True)
+            print(sorted_group_users)
             teacher_status = db.execute('SELECT is_teacher FROM group_links WHERE ext_user_id = ?', id)[0]['is_teacher']
             if teacher_status == 1:
                 is_teacher = True
