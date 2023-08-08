@@ -220,6 +220,12 @@ def buy():
         else:
             db.execute("UPDATE users SET cash = cash - ? WHERE id = ?", total, id)
             db.execute("INSERT INTO stocks (name, share_count, price, owner_id) VALUES (?,?,?,?)", symbol, shares, price, id)
+            # Merge the shares into one variable
+            if len(db.execute("SELECT share_count FROM stocks WHERE name = ? AND owner_id = ?", symbol, id)) > 1:
+                share_sum = db.execute("SELECT SUM(share_count) FROM stocks WHERE name = ? AND owner_id = ?", symbol, id)[0]['SUM(share_count)']
+                db.execute("DELETE FROM stocks WHERE name = ? AND owner_id = ?", symbol, id)
+                db.execute("INSERT INTO stocks (name, share_count, price, owner_id) VALUES (?,?,?,?)", symbol, share_sum, price, id)
+
             db.execute("DELETE FROM stocks WHERE share_count = 0 AND owner_id = ?", id)
             db.execute("INSERT INTO history (type, name, shares, price, id, time) VALUES (?,?,?,?,?,?)", "Bought", name, shares, price, id, datetime.now())
             return redirect("/")

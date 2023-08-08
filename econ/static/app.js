@@ -169,7 +169,6 @@ function makeGraph() {
     });
   
   
-  
     days = document.getElementById("dayCount").innerHTML;
   
     adjustedCloseData.reverse();
@@ -260,9 +259,78 @@ function makeGraph() {
       options: options
     });
   
-    console.log("DANIEL IS SO COOL");
   }
-  }
+  else if (document.getElementById('documentName') && document.getElementById('documentName').innerHTML == 'group_dashboard') {
+    dataPortfolioValue = document.querySelectorAll('.dataPortfolioValue');
+    dataUsername = document.querySelectorAll('.dataUsername');
+    
+    portfolioValueData = [];
+    usernameData = [];
+    
+    dataPortfolioValue.forEach((el) => {
+      portfolioValueData.push(el.innerHTML);
+    });
+    dataUsername.forEach((el) => {
+      usernameData.push(el.innerHTML);
+    });
+    
+    
+    userLen = document.getElementById('userLen').innerHTML;
+    
+    lineColor = document.getElementById("lineColor").innerHTML;
+    nodeColor = document.getElementById("nodeColor").innerHTML;
+    scalesColor = document.getElementById("scalesColor").innerHTML;
+    
+    const data = {
+      labels: usernameData,
+      datasets: [
+        {
+            label: 'Portfolio Value',
+            data: portfolioValueData,
+            borderColor: lineColor,
+            backgroundColor: nodeColor,
+            borderWidth: 3
+          }
+      ]
+    };
+    
+    if (myChart) {
+      myChart.destroy();
+    }
 
-  // make graph
-  makeGraph();
+    const options = {
+      scales: {
+        x: {
+          ticks: {
+            color: scalesColor
+          }
+        },
+        y: {
+          ticks: {
+            color: scalesColor
+          },
+          beginAtZero: false
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: scalesColor
+          }
+        }
+      }
+    };
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    myChart = new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: options
+    });
+
+  };
+};
+
+// make graph
+console.log('HI MOM!');
+makeGraph();
