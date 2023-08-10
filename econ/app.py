@@ -313,16 +313,16 @@ def groups():
                 username = db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username']
                 cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]['cash']
                 portfolio_value = cash
+
                 for asset in db.execute("SELECT name, SUM(share_count) FROM stocks WHERE owner_id = ? GROUP BY name", user_id):
                     stock = lookup(asset['name'])
                     price = stock['price']
                     shares = asset['SUM(share_count)']
                     stock_total = price * shares
                     portfolio_value += stock_total
-                print(portfolio_value)
 
                 group_users[i] = {
-                    'name': db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username'],
+                    'name': username,
                     'portfolio_value': round(portfolio_value, 2)
                 }
                 i += 1
@@ -331,7 +331,6 @@ def groups():
             for n in range(i):
                 sorted_group_users.append(group_users[n]['portfolio_value'])
 
-            print(sorted_group_users)
             sorted_group_users.sort(reverse=True)
             print(sorted_group_users)
             teacher_status = db.execute('SELECT is_teacher FROM group_links WHERE ext_user_id = ?', id)[0]['is_teacher']
@@ -347,7 +346,65 @@ def groups():
 
             now = datetime.now().replace(microsecond=0)
 
-            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average, usd=usd, datetime=now)
+            # subgroups
+            subgroups = db.execute('SELECT subgroup_id FROM subgroups WHERE main_group = ?', group_id)
+
+            for i in range(len(subgroups)):
+                # make array only contain ids
+                subgroups[i] = subgroups[i]['subgroup_id']
+
+            for subgroup in subgroups:
+                subgroup_users = db.execute('SELECT ext_user_id FROM subgroup_links WHERE ext_subgroup_id = ?', subgroup)
+
+                for j in range(len(subgroup_users)):
+                    subgroup_users[j] = subgroup_users[j]['ext_user_id']
+
+                for sub_id in subgroup_users:
+                    sub_username = db.execute('SELECT username FROM users WHERE id = ?', sub_id)[0]['username']
+                    sub_cash = round((db.execute('SELECT cash FROM users WHERE id = ?', sub_id)[0]['cash']), 2)
+
+                    sub_users = {}
+                    n = 0
+                    sub_portfolio_value = sub_cash
+
+                    # get portfolio value for each user
+                    for asset in db.execute('SELECT name, SUM(share_count) FROM stocks WHERE owner_id = ', sub_id):
+                        stock = lookup(asset)
+                        price = stock['price']
+                        shares = asset[0]['SUM(share_count)']
+                        stock_total = price * shares
+                        sub_portfolio_value += stock_total
+
+                    # add user info
+                    sub_users[n] = {
+                        'name': sub_username,
+                        'portfolio_value': sub_portfolio_value
+                    }
+                    n += 1
+
+                    # calculate average
+                    sorted_sub_users = []
+                    for p in range(n):
+                        sorted_sub_users.append(sub_users[p]['portfolio_value'])
+
+                    sorted_group_users.sort(reverse=True)
+                    sub_cash_sum = 0
+                    for cash in sorted_group_users:
+                        sub_cash_sum += cash
+                    sub_cash_average = round((sub_cash_sum / n), 2)
+
+                    # add to array of subgroups
+                    sub_groups = {}
+                    m = 0
+                    sub_groups[m] = {
+                        'name': 'null',
+                        'description': 'null',
+                        'users': sub_users,
+                        'cash_average': sub_cash_average,
+                    }
+
+            # remember to add subgroup names
+            return render_template("dashboard.html", group_name=group_name, group_users=group_users, len=i, is_teacher=is_teacher, group_cash_average=group_cash_average, usd=usd, datetime=now, subgroups=subgroups, len_=len, subgroups=subgroups)
     else:
         if request.method == "GET":
             return render_template("join_groups.html")
