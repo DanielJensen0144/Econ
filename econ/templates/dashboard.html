@@ -22,7 +22,7 @@
                 <table class="table mb-5" style="table-layout: fixed">
                     <thead>
                         <th style="width: 33.33%">#</th>
-                        <th style="width: 33.33%">Username</th>
+                        <th style="width: 33.33%">Name</th>
                         <th style="width: 33.33%">Portfolio Value</th>
                     </thead>
                     <tbody class="mono">
@@ -76,14 +76,16 @@
                     </div>
                     <div class="mb-3 col-12">
                         <label for="subgroup_users" class="form-label">Users</label>
-                        <select name="subgroup_users" id="subgroup_users">
+                        <select multiple size="6" class="form-select" name="subgroup_users" id="subgroup_users">
                             <option value="" disabled selected>Select users</option>
                             {% for user in group_users %}
                             <option value="{{ user['id']}}">{{ user['name'] }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Create</button>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
                 </form>
                 {% endif %}
                 {% if len_(subgroups) >= 1 %}

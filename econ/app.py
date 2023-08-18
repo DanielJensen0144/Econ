@@ -313,6 +313,7 @@ def groups():
                 username = db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username']
                 cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]['cash']
                 portfolio_value = cash
+                nickname = db.execute("SELECT group_nickname FROM group_links WHERE ext_user_id = ? AND ext_group_id = ?", id, group_id)[0]['group_nickname']
 
                 for asset in db.execute("SELECT name, SUM(share_count) FROM stocks WHERE owner_id = ? GROUP BY name", user_id):
                     stock = lookup(asset['name'])
@@ -323,7 +324,7 @@ def groups():
 
                 group_users.append({
                     'id': user_id,
-                    'name': username,
+                    'name': nickname,
                     'portfolio_value': round(portfolio_value, 2)
                 })
                 i += 1
@@ -410,6 +411,7 @@ def groups():
             group_name = request.form.get("group_name")
             group_id = db.execute("SELECT group_id FROM groups WHERE group_name LIKE ?", group_name)[0]["group_id"]
             group_key = request.form.get("group_key")
+            nickname = request.form.get("nickname")
 
             arnold_key = db.execute("SELECT group_key FROM groups WHERE group_id = ?", group_id)[0]["group_key"]
             if pass_check(arnold_key, group_key):
@@ -417,7 +419,7 @@ def groups():
                     teacher_key = request.form.get("teacher_key")
                     arnold_key_2 = db.execute("SELECT teacher_key FROM groups WHERE group_name LIKE ? LIMIT 1", group_name)[0]["teacher_key"]
                     if pass_check(arnold_key_2, teacher_key):
-                        db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, is_teacher) VALUES (?,?,?)", group_id, id, 1)
+                        db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, group_nickname, is_teacher) VALUES (?,?,?,?)", group_id, id, nickname, 1)
                         return redirect("/groups")
                     else:
                         return render_template("join_groups.html", error="teacher_key", er=True)
