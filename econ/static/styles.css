@@ -56,3 +56,7 @@ table {
 .mono {
     font-family: monospace;
 }
+
+.error {
+    color: #ff4545;
+}

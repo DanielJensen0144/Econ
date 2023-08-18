@@ -63,9 +63,31 @@
                 <div class="col-12 mb-5">
                     <canvas id="myChart"></canvas>
                 </div>
+                <h5 style="font-weight: 700">Subgroup Statistics</h5>
+                {% if is_teacher == True %}
+                <form class="form row" action="/create_subgroup">
+                    <div class="mb-3 col-lg-6">
+                        <label for="subgroup_name" class="form-label">Name</label>
+                        <input class="form-control" type="text" name="subgroup_name" autocomplete="off" autofocus placeholder="Enter subgroup name" id="subgroup_name">
+                    </div>
+                    <div class="mb-3 col-lg-6">
+                        <label for="subgroup_key" class="form-label">Key</label>
+                        <input class="form-control" type="text" name="subgroup_key" autocomplete="off" placeholder="Enter subgroup key" id="subgroup_key">
+                    </div>
+                    <div class="mb-3 col-12">
+                        <label for="subgroup_users" class="form-label">Users</label>
+                        <select name="subgroup_users" id="subgroup_users">
+                            <option value="" disabled selected>Select users</option>
+                            {% for user in group_users %}
+                            <option value="{{ user['id']}}">{{ user['name'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </form>
+                {% endif %}
                 {% if len_(subgroups) >= 1 %}
                 <div class="mb-5">
-                    <h5 style="font-weight: 700">Subgroup Statistics</h5>
                     {% for subgroup_id in subgroups %}
                         
                     {% endfor %}
@@ -73,7 +95,7 @@
                 </div>
                 {% endif %}
                 <!-- end of card -->
-            </div>
+            </>
         </div>
     </div>
     <!-- Metadata for js -->

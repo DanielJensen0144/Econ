@@ -22,13 +22,13 @@
     {% if er == True %}
     <div class="mb-3">
         {% if error == 'symbol' %}
-        <div style="color: #ff4545">Couldn't find symbol.</div>
+        <div class="error">Couldn't find symbol.</div>
         {% elif error == 'scammer' %}
-        <div style="color: #ff4545">Don't try that.</div>
+        <div class="error">Don't try that.</div>
         {% elif error == 'selfscammer_or_deficitbuyer' %}
-        <div class="mb-3" style="color: #ff4545">That's actually really well thought of if you're trying to buy at a deficit, but unlike the real world you can't do that here.</div>
+        <div class="mb-3 error">That's actually really well thought of if you're trying to buy at a deficit, but unlike the real world you can't do that here.</div>
         {% elif error == 'no_shares' %}
-        <div style="color: #ff4545">Congrats, you just sold <i>NO SHARES</i>.</div>
+        <div class="error">Congrats, you just sold <i>NO SHARES</i>.</div>
         {% endif %}
     </div>
     {% endif %}
