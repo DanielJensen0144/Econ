@@ -1,5 +1,6 @@
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
+import os
 from cs50 import SQL
 from econfunctions import login_required, lookup, usd, csn, graph_lookup, get_dark_mode_state, get_name
 from werkzeug.security import generate_password_hash as pass_hash_gen, check_password_hash as pass_check
@@ -305,7 +306,7 @@ def groups():
             group_user_ids = db.execute("SELECT ext_user_id FROM group_links WHERE ext_group_id = ?", group_id)
             user_len = len(group_user_ids)
             for i in range(user_len):
-                group_user_ids[i] = group_user_ids[0]['ext_user_id']
+                group_user_ids[i] = group_user_ids[i]['ext_user_id']
 
             group_users = []
             i = 0
@@ -313,7 +314,7 @@ def groups():
                 username = db.execute("SELECT username FROM users WHERE id = ?", user_id)[0]['username']
                 cash = db.execute("SELECT cash FROM users WHERE id = ?", user_id)[0]['cash']
                 portfolio_value = cash
-                nickname = db.execute("SELECT group_nickname FROM group_links WHERE ext_user_id = ? AND ext_group_id = ?", id, group_id)[0]['group_nickname']
+                nickname = db.execute("SELECT group_nickname FROM group_links WHERE ext_user_id = ? AND ext_group_id = ?", user_id, group_id)[0]['group_nickname']
 
                 for asset in db.execute("SELECT name, SUM(share_count) FROM stocks WHERE owner_id = ? GROUP BY name", user_id):
                     stock = lookup(asset['name'])
@@ -328,10 +329,13 @@ def groups():
                     'portfolio_value': round(portfolio_value, 2)
                 })
                 i += 1
+
+            print(group_users)
                 
             sorted(group_users, key=lambda x: x['portfolio_value'], reverse=True)
-            print(group_users)
 
+            print(group_users)
+            
             teacher_status = db.execute('SELECT is_teacher FROM group_links WHERE ext_user_id = ?', id)[0]['is_teacher']
             if teacher_status == 1:
                 is_teacher = True
@@ -360,10 +364,10 @@ def groups():
                     subgroup_users[j] = subgroup_users[j]['ext_user_id']
 
                 for sub_id in subgroup_users:
-                    sub_username = db.execute('SELECT username FROM users WHERE id = ?', sub_id)[0]['username']
+                    sub_username = db.execute("SELECT group_nickname FROM group_links WHERE ext_group_id = ? AND ext_user_id = ?", group_id, sub_id)
                     sub_cash = round((db.execute('SELECT cash FROM users WHERE id = ?', sub_id)[0]['cash']), 2)
 
-                    sub_users = {}
+                    sub_users = []
                     n = 0
                     sub_portfolio_value = sub_cash
 
@@ -376,21 +380,19 @@ def groups():
                         sub_portfolio_value += stock_total
 
                     # add user info
-                    sub_users[n] = {
+                    sub_users.append({
                         'name': sub_username,
                         'portfolio_value': sub_portfolio_value
-                    }
+                    })
                     n += 1
 
+                    # sort the sub_users from highest portfolio value to lowest
+                    sorted(sub_users, key=lambda x: x['portfolio_value'], reverse=True)
+                    
                     # calculate average
-                    sorted_sub_users = []
-                    for p in range(n):
-                        sorted_sub_users.append(sub_users[p]['portfolio_value'])
-
-                    sorted_group_users.sort(reverse=True)
                     sub_cash_sum = 0
-                    for cash in sorted_group_users:
-                        sub_cash_sum += cash
+                    for sub_user in sub_users:
+                        sub_cash_sum += sub_user['portfolio_value']
                     sub_cash_average = round((sub_cash_sum / n), 2)
 
                     # add to array of subgroups
@@ -424,12 +426,23 @@ def groups():
                     else:
                         return render_template("join_groups.html", error="teacher_key", er=True)
                 else:
-                    db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, is_teacher) VALUES (?,?,?)", group_id, id, 0)
+                    db.execute("INSERT INTO group_links (ext_group_id, ext_user_id, is_teacher, group_nickname) VALUES (?,?,?,?)", group_id, id, 0, nickname)
                     return redirect("/groups")
             else:
                 return render_template("join_groups.html", error="group_key", er=True)
 
-                    
+
+@app.route('/create_subgroup', methods=['GET', 'POST'])
+@login_required
+def create_subgroup():
+    if request.method == "POST":
+        if not request.form.get('subgroup_name') or not request.form.get('subgroup_key') or not request.form.get('subgroup_users'):
+            return render_template('dashboard.html', error='create_subgroup', er=True)
+        else:
+            name = request.form.get('subgroup_name')
+            key = request.form.get('subgroup_key')
+            users = request.form.get('subgroup_users')
+            db.execute('INSERT INTO subgroups (subgroup_name, subgroup_key, main_group) VALUES (?,?,?)', name, key, )
 
     
 @app.route("/logout")
@@ -440,3 +453,6 @@ def logout():
 
     # redirect user to homepage
     return render_template("homepage.html", success="TRUE2")
+
+if __name__ == '__main__':
+    app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT', 5000)))

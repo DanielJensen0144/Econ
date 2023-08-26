@@ -1,5 +1,21 @@
 {% extends "layout.html" %}
 
+{% block script %}
+
+<script>
+    console.log('Reminder to future me: please just go back to the powerpoint they get it.');
+    function logMessage() {
+        console.log('You are the one stealing their lunchbreak. Not cool.');
+    }
+    function dentistMessage() {
+        console.log('Also remember to cancel that dentist appointment today at 12:00 if you forgot (actual reminder).')
+    }
+
+    setTimeout(logMessage, 6000)
+    setTimeout(dentistMessage, 9000)
+</script>
+
+{% endblock %}
 {% block body %}
 
     <h1>Portfolio</h1>

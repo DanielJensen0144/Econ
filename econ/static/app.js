@@ -331,5 +331,5 @@ function makeGraph() {
 };
 
 // make graph
-console.log('HI MOM!');
+// console.log('HI MOM!');
 makeGraph();
